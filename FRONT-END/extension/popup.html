@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Website Time Limiter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      width: 300px;
+      padding: 15px;
+      margin: 0;
+    }
+    
+    h1 {
+      font-size: 18px;
+      color: #077b32;
+      margin-top: 0;
+    }
+    
+    .website-item {
+      border-bottom: 1px solid #eee;
+      padding: 10px 0;
+    }
+    
+    .website-url {
+      font-weight: bold;
+    }
+    
+    .time-info {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 5px;
+      font-size: 14px;
+    }
+    
+    .progress-bar {
+      height: 8px;
+      background-color: #eee;
+      border-radius: 4px;
+      margin-top: 5px;
+      overflow: hidden;
+    }
+    
+    .progress {
+      height: 100%;
+      background-color: #077b32;
+    }
+    
+    .progress.warning {
+      background-color: #ff3b3b;
+    }
+    
+    .empty-state {
+      text-align: center;
+      color: #666;
+      padding: 20px 0;
+    }
+    
+    .footer {
+      margin-top: 15px;
+      text-align: center;
+    }
+    
+    .footer a {
+      color: #077b32;
+      text-decoration: none;
+    }
+    
+    button {
+      background-color: #077b32;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+    
+    button:hover {
+      background-color: #066128;
+    }
+  </style>
+</head>
+<body>
+  <h1>Website Time Limiter</h1>
+  
+  <div id="websites-container">
+    <!-- Website items will be added here dynamically -->
+    <div class="empty-state">Loading website limits...</div>
+  </div>
+  
+  <div class="footer">
+    <a href="#" id="open-app">Open Screen Time Tracker</a>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>

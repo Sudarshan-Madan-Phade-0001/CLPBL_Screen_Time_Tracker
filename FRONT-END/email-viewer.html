@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Email Viewer - Screen Time Tracker</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+    
+    body {
+      background-color: #000;
+      color: #fff;
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    
+    h1 {
+      color: #077b32;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    
+    .email-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .email-card {
+      background-color: rgba(7, 123, 50, 0.1);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(7, 123, 50, 0.3);
+    }
+    
+    .email-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid rgba(7, 123, 50, 0.3);
+    }
+    
+    .email-to {
+      font-weight: bold;
+    }
+    
+    .email-subject {
+      color: #077b32;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    
+    .email-date {
+      color: #ccc;
+      font-size: 0.9rem;
+    }
+    
+    .email-body {
+      background-color: rgba(255, 255, 255, 0.05);
+      padding: 1rem;
+      border-radius: 5px;
+      margin-top: 1rem;
+    }
+    
+    .no-emails {
+      text-align: center;
+      color: #ccc;
+      padding: 2rem;
+    }
+    
+    .back-button {
+      display: inline-block;
+      background-color: #077b32;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 5px;
+      text-decoration: none;
+      margin-bottom: 1rem;
+      transition: all 0.3s;
+    }
+    
+    .back-button:hover {
+      background-color: #0a9e40;
+      transform: translateY(-2px);
+    }
+  </style>
+  <script src="email-service.js"></script>
+</head>
+<body>
+  <a href="home.html" class="back-button">← Back to Home</a>
+  
+  <h1>Email Notifications</h1>
+  
+  <div class="email-container" id="email-container">
+    <!-- Emails will be displayed here -->
+    <div class="no-emails" id="no-emails">No emails sent yet.</div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get email logs
+      const emailLogs = emailService.getEmailLogs();
+      const emailContainer = document.getElementById('email-container');
+      const noEmailsMessage = document.getElementById('no-emails');
+      
+      if (emailLogs && emailLogs.length > 0) {
+        // Hide the "no emails" message
+        noEmailsMessage.style.display = 'none';
+        
+        // Sort emails by sent date (newest first)
+        emailLogs.sort((a, b) => new Date(b.sentAt) - new Date(a.sentAt));
+        
+        // Display each email
+        emailLogs.forEach(email => {
+          const emailCard = document.createElement('div');
+          emailCard.className = 'email-card';
+          
+          const sentDate = new Date(email.sentAt);
+          const formattedDate = sentDate.toLocaleString();
+          
+          emailCard.innerHTML = `
+            <div class="email-header">
+              <div class="email-to">To: ${email.to}</div>
+              <div class="email-date">${formattedDate}</div>
+            </div>
+            <div class="email-subject">${email.subject}</div>
+            <div class="email-body">${email.body}</div>
+          `;
+          
+          emailContainer.appendChild(emailCard);
+        });
+      }
+    });
+  </script>
+</body>
+</html>

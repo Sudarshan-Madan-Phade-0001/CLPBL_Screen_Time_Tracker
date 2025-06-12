@@ -1,0 +1,245 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  background-color: #000;
+  color: #fff;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.focus-container {
+  max-width: 800px;
+  width: 90%;
+  padding: 2rem;
+}
+
+.focus-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.focus-header h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.focus-header h1 span {
+  color: #077b32;
+  text-shadow: 0 0 10px #077b32;
+}
+
+.focus-header p {
+  color: #ccc;
+  font-size: 1.1rem;
+}
+
+/* Timer Display */
+.timer-container {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  margin: 0 auto 2rem;
+}
+
+.timer-display {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 10;
+}
+
+.time {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.timer-label {
+  font-size: 1rem;
+  color: #ccc;
+  margin-top: -0.5rem;
+}
+
+.progress-ring-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.progress-ring {
+  transform: rotate(-90deg);
+  overflow: visible;
+}
+
+.progress-ring-circle-bg {
+  fill: none;
+  stroke: rgba(7, 123, 50, 0.1);
+  stroke-width: 10;
+}
+
+.progress-ring-circle {
+  fill: none;
+  stroke: #077b32;
+  stroke-width: 10;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease;
+}
+
+/* Form Styles */
+.focus-form {
+  background-color: rgba(7, 123, 50, 0.1);
+  border-radius: 10px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.focus-form h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: #077b32;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #ccc;
+}
+
+input {
+  width: 100%;
+  padding: 0.8rem;
+  border-radius: 5px;
+  border: 1px solid #077b32;
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 1rem;
+}
+
+input:focus {
+  outline: none;
+  box-shadow: 0 0 5px #077b32;
+}
+
+button {
+  background-color: #077b32;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.3s;
+  width: 100%;
+}
+
+button:hover {
+  background-color: #065d26;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(7, 123, 50, 0.4);
+}
+
+/* Focus Active State */
+.focus-active {
+  background-color: rgba(7, 123, 50, 0.1);
+  border-radius: 10px;
+  padding: 2rem;
+  text-align: center;
+}
+
+.focus-active h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #077b32;
+}
+
+.focus-active p {
+  margin-bottom: 1rem;
+  color: #ccc;
+}
+
+.focus-active span {
+  color: #fff;
+  font-weight: 600;
+}
+
+.focus-message {
+  font-size: 1.1rem;
+  margin: 1.5rem 0;
+}
+
+.shortcut-info {
+  margin-top: 2rem;
+  font-size: 0.9rem;
+  color: #999;
+}
+
+kbd {
+  background-color: #333;
+  border-radius: 3px;
+  border: 1px solid #666;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  color: #fff;
+  display: inline-block;
+  font-size: 0.9rem;
+  padding: 0.1rem 0.5rem;
+  margin: 0 0.2rem;
+}
+
+/* Focus Complete State */
+.focus-complete {
+  background-color: rgba(7, 123, 50, 0.1);
+  border-radius: 10px;
+  padding: 2rem;
+  text-align: center;
+}
+
+.focus-complete h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #077b32;
+}
+
+.focus-complete p {
+  margin-bottom: 2rem;
+  color: #ccc;
+  font-size: 1.1rem;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.action-buttons button {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .timer-container {
+    width: 250px;
+    height: 250px;
+  }
+  
+  .time {
+    font-size: 2.5rem;
+  }
+}

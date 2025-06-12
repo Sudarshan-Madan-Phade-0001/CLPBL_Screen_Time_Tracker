@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up - Screen Time Tracker</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+    
+    body {
+      background-color: #000;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .wrapper {
+      width: 90%;
+      max-width: 400px;
+      background-color: rgba(7, 123, 50, 0.1);
+      padding: 2.5rem;
+      border-radius: 10px;
+      box-shadow: 0 0 20px rgba(7, 123, 50, 0.3);
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+      color: #077b32;
+      font-size: 2rem;
+    }
+    
+    form div {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+    
+    label {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #077b32;
+      display: flex;
+      align-items: center;
+    }
+    
+    label svg {
+      fill: #077b32;
+    }
+    
+    input {
+      width: 100%;
+      padding: 15px 15px 15px 45px;
+      border: 1px solid #077b32;
+      background-color: rgba(7, 123, 50, 0.1);
+      border-radius: 5px;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+      transition: all 0.3s;
+    }
+    
+    input:focus {
+      border-color: #0a9e40;
+      box-shadow: 0 0 10px rgba(7, 123, 50, 0.5);
+    }
+    
+    button {
+      width: 100%;
+      padding: 15px;
+      background-color: #077b32;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 1rem;
+    }
+    
+    button:hover {
+      background-color: #0a9e40;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(7, 123, 50, 0.4);
+    }
+    
+    p {
+      text-align: center;
+      margin-top: 1.5rem;
+      color: #ccc;
+    }
+    
+    a {
+      color: #077b32;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+    
+    a:hover {
+      color: #0a9e40;
+      text-decoration: underline;
+    }
+    
+    #error-message {
+      color: #ff3b3b;
+      text-align: center;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+  </style>
+  <script src="email-service.js"></script>
+</head>
+<body>
+  <div class="wrapper">
+    <h1>Sign Up</h1>
+    <p id="error-message"></p>
+    <form id="signup-form">
+      <div>
+        <label for="name-input">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Z"/></svg>
+        </label>
+        <input type="text" name="name" id="name-input" placeholder="Full Name" required>
+      </div>
+      <div>
+        <label for="email-input">
+          <span>@</span>
+        </label>
+        <input type="email" name="email" id="email-input" placeholder="Email" required>
+      </div>
+      <div>
+        <label for="password-input">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M240-80q-33 0-56.5-23.5T160-160v-400q0-33 23.5-56.5T240-640h40v-80q0-83 58.5-141.5T480-920q83 0 141.5 58.5T680-720v80h40q33 0 56.5 23.5T800-560v400q0 33-23.5 56.5T720-80H240Zm240-200q33 0 56.5-23.5T560-360q0-33-23.5-56.5T480-440q-33 0-56.5 23.5T400-360q0 33 23.5 56.5T480-280ZM360-640h240v-80q0-50-35-85t-85-35q-50 0-85 35t-35 85v80Z"/></svg>
+        </label>
+        <input type="password" name="password" id="password-input" placeholder="Password" required>
+      </div>
+      <div>
+        <label for="confirm-password-input">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24"><path d="M240-80q-33 0-56.5-23.5T160-160v-400q0-33 23.5-56.5T240-640h40v-80q0-83 58.5-141.5T480-920q83 0 141.5 58.5T680-720v80h40q33 0 56.5 23.5T800-560v400q0 33-23.5 56.5T720-80H240Zm240-200q33 0 56.5-23.5T560-360q0-33-23.5-56.5T480-440q-33 0-56.5 23.5T400-360q0 33 23.5 56.5T480-280ZM360-640h240v-80q0-50-35-85t-85-35q-50 0-85 35t-35 85v80Z"/></svg>
+        </label>
+        <input type="password" name="confirm-password" id="confirm-password-input" placeholder="Confirm Password" required>
+      </div>
+      <button type="submit">Sign Up</button>
+    </form>
+    <p>Already have an account? <a href="login.html">Login</a></p>
+  </div>
+
+  <!-- Include the auth.js file -->
+  <script src="js/auth.js"></script>
+  <!-- Include the signup.js file -->
+  <script src="js/signup.js"></script>
+</body>
+</html>

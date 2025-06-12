@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Focus Timer - Screen Time Tracker</title>
+  <link rel="stylesheet" href="focus-timer.css">
+</head>
+<body>
+  <div class="focus-container">
+    <div class="focus-header">
+      <h1>Focus <span>Timer</span></h1>
+      <p>Time to be productive! Your social media break is over.</p>
+    </div>
+
+    <div class="timer-container">
+      <div class="timer-display">
+        <div class="time">
+          <span id="minutes">25</span>:<span id="seconds">00</span>
+        </div>
+        <div class="timer-label">remaining</div>
+      </div>
+      
+      <div class="progress-ring-container">
+        <svg class="progress-ring" width="300" height="300">
+          <circle class="progress-ring-circle-bg" cx="150" cy="150" r="120" />
+          <circle class="progress-ring-circle" cx="150" cy="150" r="120" />
+        </svg>
+      </div>
+    </div>
+
+    <div class="focus-form">
+      <h2>Set Your Productive Focus</h2>
+      <form id="focus-form">
+        <div class="form-group">
+          <label for="productive-url">Productive Website URL</label>
+          <input 
+            type="text" 
+            id="productive-url" 
+            placeholder="e.g., github.com/your-project" 
+            required
+          >
+        </div>
+        <div class="form-group">
+          <label for="focus-duration">Focus Duration (minutes)</label>
+          <input 
+            type="number" 
+            id="focus-duration" 
+            min="1" 
+            max="120" 
+            value="25" 
+            required
+          >
+        </div>
+        <button type="submit" id="start-focus">Start Focus Session</button>
+      </form>
+    </div>
+
+    <div class="focus-active" style="display: none;">
+      <h2>Focus Session Active</h2>
+      <p>You're currently focusing on: <span id="current-website">github.com</span></p>
+      <p class="focus-message">Stay focused! The timer will notify you when your session is complete.</p>
+      <p class="shortcut-info">Press <kbd>Alt</kbd> + <kbd>Q</kbd> to end your session early.</p>
+    </div>
+
+    <div class="focus-complete" style="display: none;">
+      <h2>Focus Session Complete!</h2>
+      <p>Great job staying focused!</p>
+      <div class="action-buttons">
+        <button id="extend-focus">Extend Focus Time</button>
+        <button id="return-to-dashboard">Return to Dashboard</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const focusForm = document.getElementById('focus-form');
+      const focusActive = document.querySelector('.focus-active');
+      const focusComplete = document.querySelector('.focus-complete');
+      const currentWebsite = document.getElementById('current-website');
+      const minutesDisplay = document.getElementById('minutes');
+      const secondsDisplay = document.getElementById('seconds');
+      const progressRing = document.querySelector('.progress-ring-circle');
+      const extendFocusBtn = document.getElementById('extend-focus');
+      const returnToDashboardBtn = document.getElementById('return-to-dashboard');
+      
+      let timer;
+      let totalSeconds = 0;
+      let initialTotalSeconds = 0;
+      let focusUrl = '';
+      let focusWindow = null;
+      
+      // Set up the circle properties
+      const radius = 120;
+      const circumference = 2 * Math.PI * radius;
+      progressRing.style.strokeDasharray = `${circumference} ${circumference}`;
+      
+      // Update progress ring
+      function updateProgressRing(percent) {
+        const offset = circumference - (percent / 100) * circumference;
+        progressRing.style.strokeDashoffset = offset;
+      }
+      
+      // Format time display
+      function formatTimeDisplay(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        minutesDisplay.textContent = mins.toString().padStart(2, '0');
+        secondsDisplay.textContent = secs.toString().padStart(2, '0');
+      }
+      
+      // Start the timer
+      function startTimer(durationMinutes) {
+        totalSeconds = durationMinutes * 60;
+        initialTotalSeconds = totalSeconds;
+        formatTimeDisplay(totalSeconds);
+        updateProgressRing(100);
+        
+        timer = setInterval(() => {
+          totalSeconds--;
+          
+          if (totalSeconds <= 0) {
+            clearInterval(timer);
+            focusActive.style.display = 'none';
+            focusComplete.style.display = 'block';
+            
+            // Play notification sound
+            const audio = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3');
+            audio.play();
+            
+            return;
+          }
+          
+          // Update displays
+          formatTimeDisplay(totalSeconds);
+          const percentRemaining = (totalSeconds / initialTotalSeconds) * 100;
+          updateProgressRing(percentRemaining);
+        }, 1000);
+      }
+      
+      // Handle form submission
+      focusForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const urlInput = document.getElementById('productive-url');
+        const durationInput = document.getElementById('focus-duration');
+        
+        let url = urlInput.value.trim();
+        const duration = parseInt(durationInput.value);
+        
+        // Basic validation
+        if (!url || isNaN(duration) || duration <= 0) {
+          alert('Please enter a valid website URL and focus duration.');
+          return;
+        }
+        
+        // Add http:// if not present
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+          url = 'https://' + url;
+        }
+        
+        // Extract domain for display
+        try {
+          focusUrl = url;
+          const displayUrl = new URL(url).hostname;
+          currentWebsite.textContent = displayUrl;
+        } catch (e) {
+          currentWebsite.textContent = url;
+        }
+        
+        // Hide form, show active focus
+        focusForm.parentElement.style.display = 'none';
+        focusActive.style.display = 'block';
+        
+        // Start the timer
+        startTimer(duration);
+        
+        // Open the productive website
+        focusWindow = window.open(focusUrl, '_blank');
+        
+        // Check if window was blocked by popup blocker
+        if (!focusWindow || focusWindow.closed || typeof focusWindow.closed == 'undefined') {
+          alert("Popup blocked! Please allow popups for this site to use the focus timer.");
+        }
+      });
+      
+      // Handle keyboard shortcut (Alt+Q)
+      document.addEventListener('keydown', (e) => {
+        if (e.altKey && e.key === 'q') {
+          if (timer) {
+            clearInterval(timer);
+            focusActive.style.display = 'none';
+            focusComplete.style.display = 'block';
+            
+            // Close the focus window if it's still open
+            if (focusWindow && !focusWindow.closed) {
+              focusWindow.close();
+            }
+          }
+        }
+      });
+      
+      // Handle extend focus button
+      extendFocusBtn.addEventListener('click', () => {
+        focusComplete.style.display = 'none';
+        focusForm.parentElement.style.display = 'block';
+      });
+      
+      // Handle return to dashboard button
+      returnToDashboardBtn.addEventListener('click', () => {
+        window.location.href = 'website-blocker.html';
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Screen Time Tracker</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+    
+    body {
+      background-color: #000;
+      color: #fff;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      margin-bottom: 30px;
+    }
+    
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    
+    .logo span {
+      color: #077b32;
+    }
+    
+    .nav-links {
+      display: flex;
+      gap: 20px;
+    }
+    
+    .nav-links a {
+      color: #fff;
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    
+    .nav-links a:hover {
+      color: #077b32;
+    }
+    
+    h1 {
+      color: #077b32;
+      margin-bottom: 20px;
+    }
+    
+    .dashboard {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    
+    @media (min-width: 768px) {
+      .dashboard {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    .card {
+      background-color: rgba(7, 123, 50, 0.1);
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 0 20px rgba(7, 123, 50, 0.3);
+    }
+    
+    .card h2 {
+      color: #077b32;
+      margin-bottom: 15px;
+      font-size: 1.2rem;
+    }
+    
+    .stats {
+      display: flex;
+      justify-content: space-around;
+      margin-bottom: 20px;
+    }
+    
+    .stat-item {
+      text-align: center;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #077b32;
+    }
+    
+    .stat-label {
+      font-size: 0.9rem;
+      color: #ccc;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid rgba(7, 123, 50, 0.3);
+    }
+    
+    th {
+      color: #077b32;
+      font-weight: 600;
+    }
+    
+    tr:hover {
+      background-color: rgba(7, 123, 50, 0.1);
+    }
+    
+    .refresh-btn {
+      background-color: #077b32;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      font-size: 0.9rem;
+    }
+    
+    .refresh-btn:hover {
+      background-color: #0a9e40;
+    }
+    
+    .error-message {
+      color: #ff3b3b;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">Screen <span>Time Tracker</span></div>
+    <div class="nav-links">
+      <a href="home.html">Home</a>
+      <a href="website-blocker.html">Website Blocker</a>
+      <a href="about.html">About</a>
+    </div>
+  </header>
+
+  <h1>Admin Dashboard</h1>
+  
+  <div class="dashboard">
+    <div class="card">
+      <div class="card-header">
+        <h2>System Statistics</h2>
+        <button id="refresh-stats" class="refresh-btn">Refresh</button>
+      </div>
+      <div class="stats">
+        <div class="stat-item">
+          <div id="user-count" class="stat-value">0</div>
+          <div class="stat-label">Users</div>
+        </div>
+        <div class="stat-item">
+          <div id="website-count" class="stat-value">0</div>
+          <div class="stat-label">Websites</div>
+        </div>
+      </div>
+      <div id="stats-error" class="error-message"></div>
+    </div>
+    
+    <div class="card">
+      <div class="card-header">
+        <h2>Database Status</h2>
+        <button id="check-db" class="refresh-btn">Check Connection</button>
+      </div>
+      <div id="db-status" class="stats">
+        <div class="stat-item">
+          <div id="connection-status" class="stat-value">-</div>
+          <div class="stat-label">Connection</div>
+        </div>
+      </div>
+      <div id="db-error" class="error-message"></div>
+    </div>
+    
+    <div class="card" style="grid-column: 1 / -1;">
+      <div class="card-header">
+        <h2>Registered Users</h2>
+        <button id="refresh-users" class="refresh-btn">Refresh</button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Websites</th>
+          </tr>
+        </thead>
+        <tbody id="users-table">
+          <tr>
+            <td colspan="4" style="text-align: center;">Loading users...</td>
+          </tr>
+        </tbody>
+      </table>
+      <div id="users-error" class="error-message"></div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Load initial data
+      fetchDatabaseStatus();
+      fetchUsers();
+      
+      // Set up refresh buttons
+      document.getElementById('refresh-stats').addEventListener('click', fetchDatabaseStatus);
+      document.getElementById('check-db').addEventListener('click', fetchDatabaseStatus);
+      document.getElementById('refresh-users').addEventListener('click', fetchUsers);
+    });
+    
+    // Fetch database status
+    async function fetchDatabaseStatus() {
+      try {
+        const response = await fetch('http://localhost:5000/api/db-status');
+        const data = await response.json();
+        
+        if (data.status === 'connected') {
+          document.getElementById('connection-status').textContent = 'Connected';
+          document.getElementById('connection-status').style.color = '#077b32';
+          document.getElementById('user-count').textContent = data.users;
+          document.getElementById('website-count').textContent = data.websites;
+          document.getElementById('db-error').textContent = '';
+        } else {
+          document.getElementById('connection-status').textContent = 'Disconnected';
+          document.getElementById('connection-status').style.color = '#ff3b3b';
+          document.getElementById('db-error').textContent = 'Database connection failed';
+        }
+      } catch (error) {
+        document.getElementById('connection-status').textContent = 'Error';
+        document.getElementById('connection-status').style.color = '#ff3b3b';
+        document.getElementById('db-error').textContent = 'Could not connect to server';
+        document.getElementById('stats-error').textContent = 'Could not fetch statistics';
+      }
+    }
+    
+    // Fetch users
+    async function fetchUsers() {
+      try {
+        const response = await fetch('http://localhost:5000/api/users');
+        const data = await response.json();
+        
+        if (data.success) {
+          const usersTable = document.getElementById('users-table');
+          
+          if (data.users.length === 0) {
+            usersTable.innerHTML = '<tr><td colspan="4" style="text-align: center;">No users registered yet</td></tr>';
+            return;
+          }
+          
+          usersTable.innerHTML = '';
+          
+          // Get user stats from db-status endpoint for website counts
+          const statsResponse = await fetch('http://localhost:5000/api/db-status');
+          const statsData = await statsResponse.json();
+          const userStats = statsData.user_stats || [];
+          
+          // Create a map of user IDs to website counts
+          const websiteCounts = {};
+          userStats.forEach(stat => {
+            websiteCounts[stat.id] = stat.website_count;
+          });
+          
+          data.users.forEach(user => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${user.id}</td>
+              <td>${user.username}</td>
+              <td>${user.email}</td>
+              <td>${websiteCounts[user.id] || 0}</td>
+            `;
+            usersTable.appendChild(row);
+          });
+          
+          document.getElementById('users-error').textContent = '';
+        } else {
+          document.getElementById('users-error').textContent = data.message || 'Failed to fetch users';
+        }
+      } catch (error) {
+        document.getElementById('users-error').textContent = 'Could not connect to server';
+      }
+    }
+  </script>
+</body>
+</html>

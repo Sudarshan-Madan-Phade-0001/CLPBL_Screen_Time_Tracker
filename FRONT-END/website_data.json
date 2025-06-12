@@ -1,0 +1,7 @@
+[
+  {"url": "youtube.com", "timeUsed": 45, "timeLimit": 60, "lastReset": "2023-06-01"},
+  {"url": "instagram.com", "timeUsed": 30, "timeLimit": 30, "lastReset": "2023-06-01"},
+  {"url": "twitter.com", "timeUsed": 15, "timeLimit": 20, "lastReset": "2023-06-01"},
+  {"url": "facebook.com", "timeUsed": 25, "timeLimit": 40, "lastReset": "2023-06-01"},
+  {"url": "reddit.com", "timeUsed": 50, "timeLimit": 60, "lastReset": "2023-06-01"}
+]
