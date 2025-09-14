@@ -20,8 +20,11 @@ db_config = {
 # Create database connection
 def get_db_connection():
     try:
-        # Connect directly to the database
-        conn = mysql.connector.connect(**db_config)
+        # Connect with SSL for Aiven
+        conn = mysql.connector.connect(
+            **db_config,
+            ssl_disabled=False
+        )
         return conn
     except mysql.connector.Error as err:
         print(f"Database connection error: {err}")
