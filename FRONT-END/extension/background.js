@@ -1,5 +1,5 @@
 let websiteLimits = {};
-let serverUrl = "http://localhost:5000";
+let serverUrl = "https://clpbl-screen-time-tracker.onrender.com";
 let currentUserId = null;
 
 function checkAndResetDailyLimits() {

@@ -1,6 +1,6 @@
 // API module for website tracking functionality
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://clpbl-screen-time-tracker.onrender.com/api';
 
 // Get all websites for the current user
 async function getWebsites() {

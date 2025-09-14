@@ -1,7 +1,7 @@
 // Authentication module for Screen Time Tracker
 
 const AUTH_KEY = 'screen_time_tracker_auth';
-const API_URL = 'http://localhost:5000/api';
+const API_URL = 'https://clpbl-screen-time-tracker.onrender.com/api';
 
 // Store the current user
 let currentUser = null;
