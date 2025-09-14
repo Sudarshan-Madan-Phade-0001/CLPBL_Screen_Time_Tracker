@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, send_from_directory
 from flask_cors import CORS
 import mysql.connector
 import os
@@ -274,6 +274,14 @@ def update_website_reset(user_id, website_url, reset_date):
 
 @app.route('/')
 def index():
+    return send_from_directory('FRONT-END', 'home.html')
+
+@app.route('/<path:filename>')
+def serve_static(filename):
+    return send_from_directory('FRONT-END', filename)
+
+@app.route('/api')
+def api_status():
     return jsonify({'message': 'Screen Time Tracker API is running'}), 200
 
 @app.route('/api/db-status', methods=['GET'])
