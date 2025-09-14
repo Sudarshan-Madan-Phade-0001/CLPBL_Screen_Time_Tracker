@@ -96,7 +96,7 @@ async function loadFromServer(userId) {
       data.websites.forEach(website => {
         websiteLimits[website.website_url] = {
           timeLimit: website.time_limit * 60 * 1000, // Convert minutes to milliseconds
-          timeUsed: website.time_used * 60 * 1000,   // Convert minutes to milliseconds
+          timeUsed: 0, // Start with 0 for testing
           lastReset: website.last_reset
         };
       });
@@ -135,29 +135,57 @@ function forceResetAllLimits() {
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' && tab.url) {
-    try {
-      const url = new URL(tab.url);
-      const hostname = url.hostname;
-      
-      for (const site in websiteLimits) {
-        if (hostname.includes(site)) {
-          const website = websiteLimits[site];
-          if (website.timeUsed >= website.timeLimit) {
-            chrome.tabs.update(tabId, { url: 'about:blank' });
-            return;
-          } else {
-            startTrackingTime(site, tabId);
-          }
-        }
-      }
-    } catch (e) {}
+    checkAndBlockSite(tabId, tab.url);
   }
 });
+
+function checkAndBlockSite(tabId, url) {
+  try {
+    const urlObj = new URL(url);
+    const hostname = urlObj.hostname.replace('www.', '');
+    
+    console.log('Checking site:', hostname);
+    console.log('Website limits:', websiteLimits);
+    
+    for (const site in websiteLimits) {
+      const cleanSite = site.replace('www.', '');
+      if (hostname.includes(cleanSite) || cleanSite.includes(hostname)) {
+        const website = websiteLimits[site];
+        console.log(`Found match: ${site}, timeUsed: ${website.timeUsed}, timeLimit: ${website.timeLimit}`);
+        
+        if (website.timeUsed >= website.timeLimit) {
+          console.log(`Blocking ${site}`);
+          chrome.tabs.update(tabId, { 
+            url: chrome.runtime.getURL('blocked.html') + '?site=' + encodeURIComponent(site)
+          });
+          return;
+        } else {
+          startTrackingTime(site, tabId);
+        }
+        break;
+      }
+    }
+  } catch (e) {
+    console.error('Error checking site:', e);
+  }
+}
 
 function startTrackingTime(site, tabId) {
   const website = websiteLimits[site];
   website.activeTabStartTime = Date.now();
   website.activeTabId = tabId;
+  
+  console.log(`Started tracking time for ${site}`);
+  
+  // For testing: block after 10 seconds
+  setTimeout(() => {
+    if (website.activeTabId === tabId) {
+      console.log(`Test blocking ${site} after 10 seconds`);
+      chrome.tabs.update(tabId, { 
+        url: chrome.runtime.getURL('blocked.html') + '?site=' + encodeURIComponent(site)
+      });
+    }
+  }, 10000);
   
   chrome.tabs.onRemoved.addListener(function tabCloseListener(closedTabId) {
     if (closedTabId === tabId) {
@@ -179,12 +207,17 @@ function updateTimeUsed(site) {
     updateBlockedSitesInLocalStorage();
     
     if (website.timeUsed >= website.timeLimit) {
+      console.log(`Time limit reached for ${site}`);
       chrome.tabs.query({}, (tabs) => {
         tabs.forEach(tab => {
           try {
             const url = new URL(tab.url);
-            if (url.hostname.includes(site)) {
-              chrome.tabs.update(tab.id, { url: 'about:blank' });
+            const hostname = url.hostname.replace('www.', '');
+            const cleanSite = site.replace('www.', '');
+            if (hostname.includes(cleanSite) || cleanSite.includes(hostname)) {
+              chrome.tabs.update(tab.id, { 
+                url: chrome.runtime.getURL('blocked.html') + '?site=' + encodeURIComponent(site)
+              });
             }
           } catch (e) {}
         });
