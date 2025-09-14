@@ -106,7 +106,7 @@ function isLoggedIn() {
 function notifyExtensionLogin(userId) {
   try {
     // The extension ID will need to be updated with the actual ID after installation
-    const EXTENSION_ID = "cifjlfjeohnbkbacmbghhalchfaieckn";
+    const EXTENSION_ID = "bgkdgfajihbgpebdmmkggkjakiefnmmj";
     
     chrome.runtime.sendMessage(EXTENSION_ID, {
       action: "login",
@@ -128,7 +128,7 @@ function notifyExtensionLogin(userId) {
 function notifyExtensionLogout() {
   try {
     // The extension ID will need to be updated with the actual ID after installation
-    const EXTENSION_ID = "cifjlfjeohnbkbacmbghhalchfaieckn";
+    const EXTENSION_ID = "bgkdgfajihbgpebdmmkggkjakiefnmmj";
     
     chrome.runtime.sendMessage(EXTENSION_ID, {
       action: "logout"

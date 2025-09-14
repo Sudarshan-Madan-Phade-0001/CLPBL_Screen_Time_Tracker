@@ -70,18 +70,42 @@ function updateBlockedSitesInLocalStorage() {
   });
 }
 
-function loadWebsiteLimits() {
-  chrome.storage.local.get(['websiteLimits', 'userId'], (data) => {
+async function loadWebsiteLimits() {
+  chrome.storage.local.get(['websiteLimits', 'userId'], async (data) => {
     if (data.websiteLimits) {
       websiteLimits = data.websiteLimits;
     }
     
     if (data.userId) {
       currentUserId = data.userId;
+      // Load from server
+      await loadFromServer(data.userId);
     }
     
     checkAndResetDailyLimits();
   });
+}
+
+async function loadFromServer(userId) {
+  try {
+    const response = await fetch(`${serverUrl}/api/websites?user_id=${userId}`);
+    const data = await response.json();
+    
+    if (data.success && data.websites) {
+      websiteLimits = {};
+      data.websites.forEach(website => {
+        websiteLimits[website.website_url] = {
+          timeLimit: website.time_limit * 60 * 1000, // Convert minutes to milliseconds
+          timeUsed: website.time_used * 60 * 1000,   // Convert minutes to milliseconds
+          lastReset: website.last_reset
+        };
+      });
+      chrome.storage.local.set({ websiteLimits });
+      console.log('Loaded website limits from server:', websiteLimits);
+    }
+  } catch (error) {
+    console.error('Failed to load from server:', error);
+  }
 }
 
 loadWebsiteLimits();
@@ -165,6 +189,14 @@ function updateTimeUsed(site) {
 
 chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => {
   try {
+    if (message.action === "login") {
+      currentUserId = message.userId;
+      chrome.storage.local.set({ userId: currentUserId });
+      loadFromServer(currentUserId);
+      sendResponse({ success: true });
+      return true;
+    }
+    
     if (message.action === "updateLimits") {
       websiteLimits = message.limits;
       chrome.storage.local.set({ websiteLimits });

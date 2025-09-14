@@ -125,7 +125,7 @@ function notifyExtensionWebsiteUpdate() {
     if (result.success) {
       try {
         // The extension ID will need to be updated with the actual ID after installation
-        const EXTENSION_ID = "cifjlfjeohnbkbacmbghhalchfaieckn";
+        const EXTENSION_ID = "bgkdgfajihbgpebdmmkggkjakiefnmmj";
         
         // Convert server data format to extension format
         const websiteLimits = {};
