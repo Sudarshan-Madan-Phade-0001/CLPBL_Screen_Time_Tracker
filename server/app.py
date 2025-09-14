@@ -20,35 +20,7 @@ db_config = {
 # Create database connection
 def get_db_connection():
     try:
-        # First try to connect to MySQL server
-        conn = mysql.connector.connect(
-            host=db_config['host'],
-            user=db_config['user'],
-            password=db_config['password']
-        )
-        
-        # Check if database exists, create if it doesn't
-        cursor = conn.cursor()
-        cursor.execute("SHOW DATABASES LIKE 'screen_time_tracker'")
-        result = cursor.fetchone()
-        
-        if not result:
-            # Create database and tables
-            print("Creating database...")
-            with open('create_database.sql', 'r') as f:
-                sql_script = f.read()
-                
-            # Split the script into individual statements
-            statements = sql_script.split(';')
-            for statement in statements:
-                if statement.strip():
-                    cursor.execute(statement)
-            
-            conn.commit()
-            print("Database created successfully")
-        
-        # Connect to the database
-        conn.close()
+        # Connect directly to the database
         conn = mysql.connector.connect(**db_config)
         return conn
     except mysql.connector.Error as err:
