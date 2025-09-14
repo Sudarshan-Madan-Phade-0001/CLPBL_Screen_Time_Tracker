@@ -1,117 +1,167 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Website Blocked</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f5f5f5;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      padding: 20px;
-      box-sizing: border-box;
-    }
-    
-    .blocked-container {
-      background-color: white;
-      border-radius: 10px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-      padding: 40px;
-      max-width: 600px;
-      text-align: center;
-    }
-    
-    h1 {
-      color: #ff3b3b;
-      margin-top: 0;
-    }
-    
-    p {
-      color: #333;
-      line-height: 1.6;
-      margin-bottom: 20px;
-    }
-    
-    .website-name {
-      font-weight: bold;
-      color: #1a2e4c;
-    }
-    
-    .buttons {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin-top: 30px;
-    }
-    
-    button {
-      padding: 12px 24px;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    
-    .focus-btn {
-      background-color: #077b32;
-      color: white;
-    }
-    
-    .focus-btn:hover {
-      background-color: #066128;
-    }
-    
-    .back-btn {
-      background-color: #e0e0e0;
-      color: #333;
-    }
-    
-    .back-btn:hover {
-      background-color: #d0d0d0;
-    }
-  </style>
+    <meta charset="utf-8">
+    <title>Site Blocked - Digital Detox</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Arial', sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        
+        .container {
+            text-align: center;
+            max-width: 600px;
+            padding: 40px;
+        }
+        
+        .digital-detox-icon {
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .digital-detox-icon::before {
+            content: "🧘‍♀️";
+            font-size: 80px;
+            position: absolute;
+        }
+        
+        .digital-detox-icon::after {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2"/><path d="M30 50 Q50 30 70 50 Q50 70 30 50" fill="rgba(255,255,255,0.1)"/></svg>') center/contain no-repeat;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+        
+        .blocked-site {
+            font-size: 1.2em;
+            color: #ffeb3b;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .message {
+            font-size: 1.1em;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .suggestions {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+        }
+        
+        .suggestions h3 {
+            margin-top: 0;
+            color: #ffeb3b;
+        }
+        
+        .suggestions ul {
+            text-align: left;
+            list-style: none;
+            padding: 0;
+        }
+        
+        .suggestions li {
+            padding: 5px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .suggestions li::before {
+            content: "✨";
+            position: absolute;
+            left: 0;
+        }
+        
+        .time-info {
+            margin-top: 20px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .digital-detox-icon {
+            animation: pulse 3s ease-in-out infinite;
+        }
+    </style>
 </head>
 <body>
-  <div class="blocked-container">
-    <h1>Website Blocked</h1>
-    <p>You've reached your daily time limit for <span id="website-name" class="website-name">this website</span>.</p>
-    <p>Taking regular breaks from certain websites can help improve your focus and productivity.</p>
-    <p>Your time limit will reset at midnight.</p>
-    
-    <div class="buttons">
-      <button class="back-btn" id="go-back">Go Back</button>
-      <button class="focus-btn" id="focus-session">Start Focus Session</button>
+    <div class="container">
+        <div class="digital-detox-icon"></div>
+        
+        <h1>Digital Detox Time!</h1>
+        
+        <div class="blocked-site" id="siteName">
+            This website is currently blocked
+        </div>
+        
+        <div class="message">
+            You've reached your time limit for today. Take this opportunity to step away from the screen and engage in more meaningful activities.
+        </div>
+        
+        <div class="suggestions">
+            <h3>Try These Instead:</h3>
+            <ul>
+                <li>Take a 10-minute walk outside</li>
+                <li>Practice deep breathing or meditation</li>
+                <li>Read a book or article</li>
+                <li>Connect with a friend or family member</li>
+                <li>Work on a creative project</li>
+                <li>Do some stretching or exercise</li>
+            </ul>
+        </div>
+        
+        <div class="time-info">
+            Your limits will reset tomorrow. Stay strong! 💪
+        </div>
     </div>
-  </div>
-  
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // Get the blocked website from URL parameters
-      const urlParams = new URLSearchParams(window.location.search);
-      const site = urlParams.get('site');
-      
-      if (site) {
-        document.getElementById('website-name').textContent = site;
-      }
-      
-      // Handle go back button
-      document.getElementById('go-back').addEventListener('click', () => {
-        window.location.href = "chrome://newtab";
-      });
-      
-      // Handle focus session button
-      document.getElementById('focus-session').addEventListener('click', () => {
-        // Open the focus timer page
-        window.location.href = "chrome://newtab";
-        window.open('../focus-timer.html', '_blank');
-      });
-    });
-  </script>
+    
+    <script>
+        // Get the blocked site from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const site = urlParams.get('site');
+        
+        if (site) {
+            document.getElementById('siteName').textContent = `${site} is blocked`;
+        }
+        
+        // Prevent going back
+        history.pushState(null, null, location.href);
+        window.onpopstate = function () {
+            history.go(1);
+        };
+    </script>
 </body>
 </html>

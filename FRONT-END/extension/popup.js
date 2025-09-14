@@ -1,4 +1,4 @@
-// Format time in milliseconds to a readable format
+// Format time in milliseconds to readable format
 function formatTime(milliseconds) {
   const minutes = Math.floor(milliseconds / 60000);
   if (minutes < 60) {
@@ -14,13 +14,12 @@ function formatTime(milliseconds) {
 function loadWebsiteLimits() {
   const container = document.getElementById('websites-container');
   
-  // Get website limits from background script
   chrome.runtime.sendMessage({ action: "getLimits" }, (response) => {
     if (!response || !response.limits) {
       container.innerHTML = `
         <div class="empty-state">
-          Could not load website limits.<br>
-          Please try again later.
+          No website limits set.<br>
+          Open the Screen Time Tracker app to add websites.
         </div>
       `;
       return;
@@ -48,6 +47,10 @@ function loadWebsiteLimits() {
       const percentUsed = Math.min(100, (timeUsed / timeLimit) * 100);
       const timeRemaining = Math.max(0, timeLimit - timeUsed);
       
+      let progressClass = '';
+      if (percentUsed > 90) progressClass = 'danger';
+      else if (percentUsed > 75) progressClass = 'warning';
+      
       const websiteItem = document.createElement('div');
       websiteItem.className = 'website-item';
       websiteItem.innerHTML = `
@@ -57,7 +60,7 @@ function loadWebsiteLimits() {
           <span>${formatTime(timeRemaining)} remaining</span>
         </div>
         <div class="progress-bar">
-          <div class="progress ${percentUsed > 75 ? 'warning' : ''}" style="width: ${percentUsed}%"></div>
+          <div class="progress ${progressClass}" style="width: ${percentUsed}%"></div>
         </div>
       `;
       
@@ -68,8 +71,9 @@ function loadWebsiteLimits() {
 
 // Handle opening the main app
 document.getElementById('open-app').addEventListener('click', () => {
-  // Open the website blocker page in a new tab
-  window.open('../website-blocker.html', '_blank');
+  chrome.tabs.create({ 
+    url: 'https://clpbl-screen-time-tracker.onrender.com' 
+  });
 });
 
 // Load website limits when popup opens
