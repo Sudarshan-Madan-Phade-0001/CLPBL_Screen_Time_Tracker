@@ -121,38 +121,21 @@ async function updateWebsiteTime(websiteUrl, timeUsed) {
 
 // Notify Chrome extension about website updates
 function notifyExtensionWebsiteUpdate() {
-  getWebsites().then(result => {
-    if (result.success) {
-      try {
-        // The extension ID will need to be updated with the actual ID after installation
-        const EXTENSION_ID = "bgkdgfajihbgpebdmmkggkjakiefnmmj";
-        
-        // Convert server data format to extension format
-        const websiteLimits = {};
-        result.websites.forEach(website => {
-          websiteLimits[website.website_url] = {
-            timeLimit: website.time_limit * 60 * 1000, // Convert minutes to milliseconds
-            timeUsed: website.time_used * 60 * 1000,   // Convert minutes to milliseconds
-            lastReset: website.last_reset
-          };
-        });
-        
-        chrome.runtime.sendMessage(EXTENSION_ID, {
-          action: "updateLimits",
-          limits: websiteLimits
-        }, function(response) {
-          if (chrome.runtime.lastError) {
-            console.log("Extension communication error:", chrome.runtime.lastError.message);
-          } else if (response && response.success) {
-            console.log("Website limits updated in extension");
-          }
-        });
-      } catch (e) {
-        // Extension not available or not installed
-        console.log("Extension not available:", e);
+  try {
+    const EXTENSION_ID = "bgkdgfajihbgpebdmmkggkjakiefnmmj";
+    
+    chrome.runtime.sendMessage(EXTENSION_ID, {
+      action: "refreshData"
+    }, function(response) {
+      if (chrome.runtime.lastError) {
+        console.log("Extension communication error:", chrome.runtime.lastError.message);
+      } else if (response && response.success) {
+        console.log("Extension data refreshed");
       }
-    }
-  });
+    });
+  } catch (e) {
+    console.log("Extension not available:", e);
+  }
 }
 
 // Export functions

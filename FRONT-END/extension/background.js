@@ -110,6 +110,12 @@ async function loadFromServer(userId) {
 
 loadWebsiteLimits();
 setInterval(checkAndResetDailyLimits, 60000);
+// Refresh data from server every 30 seconds
+setInterval(() => {
+  if (currentUserId) {
+    loadFromServer(currentUserId);
+  }
+}, 30000);
 
 function forceResetAllLimits() {
   const today = new Date().toISOString().split('T')[0];
@@ -202,6 +208,16 @@ chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => 
       chrome.storage.local.set({ websiteLimits });
       updateBlockedSitesInLocalStorage();
       sendResponse({ success: true });
+      return true;
+    }
+    
+    if (message.action === "refreshData") {
+      if (currentUserId) {
+        loadFromServer(currentUserId);
+        sendResponse({ success: true });
+      } else {
+        sendResponse({ success: false });
+      }
       return true;
     }
     
