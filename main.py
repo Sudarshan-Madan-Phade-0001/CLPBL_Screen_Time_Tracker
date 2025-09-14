@@ -1,6 +1,9 @@
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), 'server'))
+
+# Change to server directory for database files
+os.chdir(os.path.join(os.path.dirname(__file__), 'server'))
+sys.path.append('.')
 
 from app import app
 
