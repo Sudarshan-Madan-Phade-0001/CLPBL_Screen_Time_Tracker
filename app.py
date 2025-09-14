@@ -7,7 +7,12 @@ from datetime import datetime
 import hashlib
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+# Enable CORS for Chrome extension
+CORS(app, origins=[
+    "https://clpbl-screen-time-tracker.onrender.com",
+    "chrome-extension://*",
+    "moz-extension://*"
+], supports_credentials=True)
 
 # Database configuration
 db_config = {

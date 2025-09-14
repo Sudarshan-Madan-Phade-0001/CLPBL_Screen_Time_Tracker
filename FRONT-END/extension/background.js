@@ -1,36 +1,64 @@
+const API_BASE = "https://clpbl-screen-time-tracker.onrender.com/api";
 let websiteLimits = {};
-let serverUrl = "https://clpbl-screen-time-tracker.onrender.com";
 let currentUserId = null;
-let activeTimers = {};
 
-// Load data on startup
-chrome.storage.local.get(['userId'], (data) => {
+// Initialize on startup
+chrome.runtime.onStartup.addListener(initialize);
+chrome.runtime.onInstalled.addListener(initialize);
+
+async function initialize() {
+  console.log("Extension initialized");
+  const data = await chrome.storage.local.get(['userId', 'websiteLimits']);
   if (data.userId) {
     currentUserId = data.userId;
-    loadFromServer(data.userId);
+    await loadWebsiteLimits();
   }
-});
+  if (data.websiteLimits) {
+    websiteLimits = data.websiteLimits;
+  }
+  checkDailyReset();
+}
 
 // Load website limits from server
-async function loadFromServer(userId) {
+async function loadWebsiteLimits() {
+  if (!currentUserId) return;
+  
   try {
-    const response = await fetch(`${serverUrl}/api/websites?user_id=${userId}`);
+    const response = await fetch(`${API_BASE}/websites?user_id=${currentUserId}`);
     const data = await response.json();
     
     if (data.success && data.websites) {
       websiteLimits = {};
       data.websites.forEach(website => {
         websiteLimits[website.website_url] = {
-          timeLimit: website.time_limit * 60 * 1000,
+          timeLimit: website.time_limit * 60 * 1000, // Convert to milliseconds
           timeUsed: website.time_used * 60 * 1000,
-          lastReset: website.last_reset
+          lastReset: website.last_reset,
+          blocked: false
         };
       });
-      console.log('Loaded limits:', websiteLimits);
+      
+      await chrome.storage.local.set({ websiteLimits });
+      console.log("Loaded website limits:", websiteLimits);
     }
   } catch (error) {
-    console.error('Failed to load from server:', error);
+    console.error("Failed to load website limits:", error);
   }
+}
+
+// Check if daily reset is needed
+function checkDailyReset() {
+  const today = new Date().toISOString().split('T')[0];
+  
+  Object.keys(websiteLimits).forEach(site => {
+    if (websiteLimits[site].lastReset !== today) {
+      websiteLimits[site].timeUsed = 0;
+      websiteLimits[site].blocked = false;
+      websiteLimits[site].lastReset = today;
+    }
+  });
+  
+  chrome.storage.local.set({ websiteLimits });
 }
 
 // Check if site should be blocked
@@ -40,17 +68,46 @@ function shouldBlockSite(hostname) {
     const cleanHostname = hostname.replace('www.', '');
     
     if (cleanHostname.includes(cleanSite) || cleanSite.includes(cleanHostname)) {
-      const website = websiteLimits[site];
-      return website.timeUsed >= website.timeLimit;
+      const limit = websiteLimits[site];
+      return limit.timeUsed >= limit.timeLimit || limit.blocked;
     }
   }
   return false;
 }
 
-// Block site immediately
+// Block site
 function blockSite(tabId, site) {
   const blockedUrl = chrome.runtime.getURL('blocked.html') + '?site=' + encodeURIComponent(site);
   chrome.tabs.update(tabId, { url: blockedUrl });
+  
+  // Mark as blocked
+  if (websiteLimits[site]) {
+    websiteLimits[site].blocked = true;
+    chrome.storage.local.set({ websiteLimits });
+  }
+}
+
+// Track time for site
+function trackTime(site) {
+  if (!websiteLimits[site] || websiteLimits[site].blocked) return;
+  
+  websiteLimits[site].timeUsed += 1000; // Add 1 second
+  
+  // Check if limit exceeded
+  if (websiteLimits[site].timeUsed >= websiteLimits[site].timeLimit) {
+    websiteLimits[site].blocked = true;
+    
+    // Block all tabs with this site
+    chrome.tabs.query({}, (tabs) => {
+      tabs.forEach(tab => {
+        if (tab.url && tab.url.includes(site)) {
+          blockSite(tab.id, site);
+        }
+      });
+    });
+  }
+  
+  chrome.storage.local.set({ websiteLimits });
 }
 
 // Main tab listener
@@ -60,7 +117,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       const url = new URL(tab.url);
       const hostname = url.hostname;
       
-      // Check if this site should be blocked
+      // Check if should block immediately
       if (shouldBlockSite(hostname)) {
         for (const site in websiteLimits) {
           const cleanSite = site.replace('www.', '');
@@ -71,83 +128,72 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
         }
       }
       
-      // Start tracking time for this site
+      // Start tracking time
       for (const site in websiteLimits) {
         const cleanSite = site.replace('www.', '');
         if (hostname.includes(cleanSite) || cleanSite.includes(hostname)) {
-          startTracking(site, tabId);
+          // Track time every second
+          const interval = setInterval(() => {
+            chrome.tabs.get(tabId, (currentTab) => {
+              if (chrome.runtime.lastError || !currentTab || !currentTab.url || !currentTab.url.includes(site)) {
+                clearInterval(interval);
+                return;
+              }
+              trackTime(site);
+            });
+          }, 1000);
           break;
         }
       }
     } catch (e) {
-      console.error('Error processing tab:', e);
+      console.error("Error processing tab:", e);
     }
   }
 });
 
-// Start tracking time for a site
-function startTracking(site, tabId) {
-  // Clear any existing timer for this tab
-  if (activeTimers[tabId]) {
-    clearInterval(activeTimers[tabId]);
+// Handle messages from popup and web app
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === "getLimits") {
+    sendResponse({ limits: websiteLimits });
+    return true;
   }
   
-  const startTime = Date.now();
-  
-  // Update time every second
-  activeTimers[tabId] = setInterval(() => {
-    const timeSpent = Date.now() - startTime;
-    websiteLimits[site].timeUsed += 1000; // Add 1 second
-    
-    // Check if limit exceeded
-    if (websiteLimits[site].timeUsed >= websiteLimits[site].timeLimit) {
-      clearInterval(activeTimers[tabId]);
-      delete activeTimers[tabId];
-      blockSite(tabId, site);
-    }
-  }, 1000);
-}
-
-// Clean up when tab is closed
-chrome.tabs.onRemoved.addListener((tabId) => {
-  if (activeTimers[tabId]) {
-    clearInterval(activeTimers[tabId]);
-    delete activeTimers[tabId];
+  if (message.action === "refreshData") {
+    loadWebsiteLimits().then(() => {
+      sendResponse({ success: true });
+    });
+    return true;
   }
 });
 
-// Handle messages from web app
+// Handle external messages from web app
 chrome.runtime.onMessageExternal.addListener((message, sender, sendResponse) => {
   if (message.action === "login") {
     currentUserId = message.userId;
     chrome.storage.local.set({ userId: currentUserId });
-    loadFromServer(currentUserId);
-    sendResponse({ success: true });
+    loadWebsiteLimits().then(() => {
+      sendResponse({ success: true });
+    });
+    return true;
   }
   
   if (message.action === "refreshData") {
-    if (currentUserId) {
-      loadFromServer(currentUserId);
+    loadWebsiteLimits().then(() => {
       sendResponse({ success: true });
-    } else {
-      sendResponse({ success: false });
-    }
+    });
+    return true;
   }
-  
-  return true;
 });
 
-// Handle internal messages
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === "getLimits") {
-    sendResponse({ limits: websiteLimits });
-  }
-  return true;
-});
+// Check for daily reset every minute
+setInterval(checkDailyReset, 60000);
 
 // Refresh data every 30 seconds
 setInterval(() => {
   if (currentUserId) {
-    loadFromServer(currentUserId);
+    loadWebsiteLimits();
   }
 }, 30000);
+
+// Initialize immediately
+initialize();

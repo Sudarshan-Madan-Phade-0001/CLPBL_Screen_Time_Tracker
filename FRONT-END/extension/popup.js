@@ -11,10 +11,16 @@ function formatTime(milliseconds) {
 }
 
 // Load and display website limits
-function loadWebsiteLimits() {
+async function loadWebsiteLimits() {
   const container = document.getElementById('websites-container');
   
-  chrome.runtime.sendMessage({ action: "getLimits" }, (response) => {
+  try {
+    // First try to refresh data from server
+    await chrome.runtime.sendMessage({ action: "refreshData" });
+    
+    // Then get the updated limits
+    const response = await chrome.runtime.sendMessage({ action: "getLimits" });
+    
     if (!response || !response.limits) {
       container.innerHTML = `
         <div class="empty-state">
@@ -42,19 +48,25 @@ function loadWebsiteLimits() {
     
     websites.forEach(url => {
       const website = limits[url];
-      const timeUsed = website.timeUsed;
-      const timeLimit = website.timeLimit;
-      const percentUsed = Math.min(100, (timeUsed / timeLimit) * 100);
+      const timeUsed = website.timeUsed || 0;
+      const timeLimit = website.timeLimit || 0;
+      const percentUsed = timeLimit > 0 ? Math.min(100, (timeUsed / timeLimit) * 100) : 0;
       const timeRemaining = Math.max(0, timeLimit - timeUsed);
       
       let progressClass = '';
-      if (percentUsed > 90) progressClass = 'danger';
-      else if (percentUsed > 75) progressClass = 'warning';
+      let status = '';
+      
+      if (website.blocked || timeUsed >= timeLimit) {
+        progressClass = 'danger';
+        status = ' (BLOCKED)';
+      } else if (percentUsed > 75) {
+        progressClass = 'warning';
+      }
       
       const websiteItem = document.createElement('div');
       websiteItem.className = 'website-item';
       websiteItem.innerHTML = `
-        <div class="website-url">${url}</div>
+        <div class="website-url">${url}${status}</div>
         <div class="time-info">
           <span>${formatTime(timeUsed)} used</span>
           <span>${formatTime(timeRemaining)} remaining</span>
@@ -66,7 +78,15 @@ function loadWebsiteLimits() {
       
       container.appendChild(websiteItem);
     });
-  });
+    
+  } catch (error) {
+    console.error("Error loading website limits:", error);
+    container.innerHTML = `
+      <div class="empty-state">
+        Error loading data. Please try again.
+      </div>
+    `;
+  }
 }
 
 // Handle opening the main app
@@ -77,4 +97,9 @@ document.getElementById('open-app').addEventListener('click', () => {
 });
 
 // Load website limits when popup opens
-document.addEventListener('DOMContentLoaded', loadWebsiteLimits);
+document.addEventListener('DOMContentLoaded', () => {
+  loadWebsiteLimits();
+  
+  // Refresh every 5 seconds while popup is open
+  setInterval(loadWebsiteLimits, 5000);
+});
